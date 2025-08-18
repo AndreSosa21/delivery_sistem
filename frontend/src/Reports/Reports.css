@@ -1,0 +1,9 @@
+.page {
+  padding: 2rem;
+  text-align: center;
+}
+
+.page h2 {
+  color: #e65100;
+  margin-bottom: 1rem;
+}

@@ -1,47 +1,40 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import "./principal.css";
+
+import Orders from "./Orders/Orders";
+import Products from "./Products/Products";
+import Users from "./Users/Users";
+import Reports from "./Reports/Reports";
+
+function AdminHome() {
+  return (
+    <div className="admin-home">
+      <h1>Panel de Administración</h1>
+      <p>Gestiona tu sistema de delivery de manera rápida y sencilla.</p>
+
+      <div className="admin-buttons">
+        <Link to="/orders" className="admin-btn">📦 Pedidos</Link>
+        <Link to="/products" className="admin-btn">🍔 Productos</Link>
+        <Link to="/users" className="admin-btn">👥 Usuarios</Link>
+        <Link to="/reports" className="admin-btn">📊 Reportes</Link>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   return (
-    <div className="app-container">
-      <header className="header">
-        <h1>Delivery System</h1>
-      </header>
-
-      <main className="main-content">
-        <section className="intro">
-          <h2>¡Tu comida favorita a un clic!</h2>
-          <p>Rápido, seguro y delicioso 🍔🍕🍣</p>
-          <button className="order-btn">Hacer Pedido</button>
-        </section>
-
-        <section className="menu">
-          <h3>Menú Destacado</h3>
-          <div className="menu-grid">
-            <div className="menu-card">
-              <img src="https://via.placeholder.com/150" alt="Hamburguesa" />
-              <h4>Hamburguesa</h4>
-              <p>$25.000</p>
-            </div>
-            <div className="menu-card">
-              <img src="https://via.placeholder.com/150" alt="Pizza" />
-              <h4>Pizza</h4>
-              <p>$32.000</p>
-            </div>
-            <div className="menu-card">
-              <img src="https://via.placeholder.com/150" alt="Sushi" />
-              <h4>Sushi</h4>
-              <p>$40.000</p>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="footer">
-        <p>© 2025 Delivery System</p>
-      </footer>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<AdminHome />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/users" element={<Users />} />
+        <Route path="/reports" element={<Reports />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
