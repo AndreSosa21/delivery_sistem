@@ -1,11 +1,11 @@
 import mysql from 'mysql2/promise';
 
 const pool = mysql.createPool({
-  host: 'localhost',      // si usas puerto distinto: '127.0.0.1'
-  port: 3307,             // ⚠️ si cambiaste el puerto, usa este
+  host: 'db',            // 👉 usa el nombre del servicio en docker-compose
+  port: 3306,            // dentro de docker normalmente es el puerto interno
   user: 'user_delivery',
   password: 'delivery1234',
-  database: 'delivery_db',
+  database: 'delivery',
 });
 
 export default pool;

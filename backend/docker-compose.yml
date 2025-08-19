@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: delivery
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  backend:
+    build: .
+    container_name: backend-delivery
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db   # 👈 nombre del servicio, no localhost
+      DB_PORT: 3306
+      DB_USER: user
+      DB_PASSWORD: pass
+      DB_NAME: delivery
+    depends_on:
+      - db
+
+volumes:
+  db_data:

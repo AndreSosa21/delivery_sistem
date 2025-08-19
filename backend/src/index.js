@@ -1,12 +1,15 @@
 import express from 'express';
 import usersRouter from './routes/users.js';
 import deliveriesRouter from './routes/deliveries.js';
+import cors from "cors";
 
 const port = process.env.PORT || 3000;
 const app = express();
 
 // Middleware for parsing JSON
 app.use(express.json());
+
+app.use(cors());  // habilita CORS para todas las rutas
 
 // principal route
 app.get("/", (req, res) => {

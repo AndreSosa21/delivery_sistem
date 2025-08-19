@@ -1,9 +1,77 @@
 .page {
   padding: 2rem;
-  text-align: center;
+  font-family: Arial, sans-serif;
+  background: #fafafa;
+  min-height: 100vh;
 }
 
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #e65100;
+  padding: 1rem 2rem;
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.header .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.header nav ul {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+}
+
+.header nav ul li a {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.header nav ul li a:hover {
+  text-decoration: underline;
+}
+
+/* Títulos */
 .page h2 {
   color: #e65100;
   margin-bottom: 1rem;
+}
+
+/* Tabla de usuarios */
+.users-table {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.users-table th,
+.users-table td {
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.users-table thead {
+  background: #ffe0b2;
+}
+
+.users-table tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
 }
