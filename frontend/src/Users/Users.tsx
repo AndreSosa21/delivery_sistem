@@ -57,7 +57,7 @@ const Users: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get<User[]>("http://localhost:3000/users");
+      const res = await axios.get<User[]>("http://localhost:3000/api/users");
       setUsers(res.data);
     } catch (err) {
       setError("Error al cargar usuarios");
@@ -77,9 +77,9 @@ const Users: React.FC = () => {
 
     try {
       if (editingId) {
-        await axios.put('http://localhost:3000/users/${editingId}', form);
+        await axios.put('http://localhost:3000/api/users/${editingId}', form);
       } else {
-        await axios.post("http://localhost:3000/users", form);
+        await axios.post("http://localhost:3000/api/users", form);
       }
       setForm({ username: "", email: "", phone: "", address: "" });
       setEditingId(null);
@@ -94,10 +94,10 @@ const Users: React.FC = () => {
     setForm({ username: user.username, email: user.email, phone: user.phone, address: user.address });
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async () => {
     if (!window.confirm("¿Seguro que quieres eliminar este usuario?")) return;
     try {
-      await axios.delete('http://localhost:3000/users/${id}');
+      await axios.delete('http://localhost:3000/api/users/${id}');
       fetchUsers();
     } catch {
       alert("No se pudo eliminar el usuario");

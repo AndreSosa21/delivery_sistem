@@ -14,13 +14,13 @@ services:
     volumes:
       - db_data:/var/lib/mysql
 
-  backend:
-    build: .
-    container_name: backend-delivery
+  app:
+    image: andrea233/delivery_system:1.6.0
+    container_name: delivery-app
     ports:
       - "3000:3000"
     environment:
-      DB_HOST: db   # 👈 nombre del servicio, no localhost
+      DB_HOST: db
       DB_PORT: 3306
       DB_USER: user
       DB_PASSWORD: pass

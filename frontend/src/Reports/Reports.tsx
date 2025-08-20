@@ -1,4 +1,4 @@
-import React from "react";
+
 import "./Reports.css";
 
 export default function Reports() {

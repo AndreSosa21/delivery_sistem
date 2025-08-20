@@ -2,33 +2,36 @@ import express from 'express';
 import usersRouter from './routes/users.js';
 import deliveriesRouter from './routes/deliveries.js';
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const port = process.env.PORT || 3000;
 const app = express();
 
-// Middleware for parsing JSON
+// Necesario para __dirname en ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Ruta al frontend compilado dentro de backend/public
+const frontendPath = path.join(__dirname, "../public");
+
+// Middleware
 app.use(express.json());
+app.use(cors());
 
-app.use(cors());  // habilita CORS para todas las rutas
+// ----- Rutas del backend -----
+app.use('/api/users', usersRouter);
+app.use('/api/deliveries', deliveriesRouter);
 
-// principal route
-app.get("/", (req, res) => {
-    res.send("Server is running. Available routes: /users, /deliveries");
+// ----- Servir frontend compilado -----
+app.use(express.static(frontendPath));
+
+// ----- Catch-all para SPA -----
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-// users routes
-app.use('/users', usersRouter);
-// deliveries routes
-app.use('/deliveries', deliveriesRouter);
-
-// validation route not found
-
-app.use((req, res, next) => {
-    res.status(404).json({ error: "Ruta no encontrada" });
-});
-
-
-// listen server
+// Iniciar servidor
 app.listen(port, () => {
     console.log('Server listening on', port);
 });
