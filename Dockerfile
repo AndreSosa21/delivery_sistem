@@ -21,9 +21,9 @@ RUN npm install
 # Copiar código backend
 COPY backend/ .
 
-# Copiar build del frontend dentro del backend/public
-RUN mkdir -p /app/backend/public
-COPY --from=frontend-build /app/frontend/dist /app/backend/public
+# Copiar build del frontend
+RUN mkdir -p /app/backend/src/public
+COPY --from=frontend-build /app/frontend/dist /app/backend/src/public
 
 # Exponer puerto
 EXPOSE 3000

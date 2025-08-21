@@ -57,7 +57,7 @@ const Users: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get<User[]>("http://localhost:3000/api/users");
+      const res = await axios.get<User[]>("/delivery/api/users");
       setUsers(res.data);
     } catch (err) {
       setError("Error al cargar usuarios");
@@ -77,9 +77,9 @@ const Users: React.FC = () => {
 
     try {
       if (editingId) {
-        await axios.put('http://localhost:3000/api/users/${editingId}', form);
+        await axios.put(`/delivery/api/users/${editingId}`, form);
       } else {
-        await axios.post("http://localhost:3000/api/users", form);
+        await axios.post("/delivery/api/users", form);
       }
       setForm({ username: "", email: "", phone: "", address: "" });
       setEditingId(null);
@@ -94,10 +94,10 @@ const Users: React.FC = () => {
     setForm({ username: user.username, email: user.email, phone: user.phone, address: user.address });
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm("¿Seguro que quieres eliminar este usuario?")) return;
     try {
-      await axios.delete('http://localhost:3000/api/users/${id}');
+      await axios.delete(`/delivery/api/users/${id}`);
       fetchUsers();
     } catch {
       alert("No se pudo eliminar el usuario");
@@ -130,7 +130,15 @@ const Users: React.FC = () => {
           <input placeholder="Dirección" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
           <button onClick={handleSubmit} className="btn submit">{editingId ? "Actualizar" : "Agregar"}</button>
           {editingId && (
-            <button onClick={() => { setEditingId(null); setForm({ username: "", email: "", phone: "", address: "" }); }} className="btn cancel">Cancelar</button>
+            <button
+              onClick={() => { 
+                setEditingId(null); 
+                setForm({ username: "", email: "", phone: "", address: "" }); 
+              }} 
+              className="btn cancel"
+            >
+              Cancelar
+            </button>
           )}
         </div>
 
@@ -143,4 +151,4 @@ const Users: React.FC = () => {
   );
 };
 
-export default Users;
+export default Users;

@@ -41,7 +41,7 @@ function AdminHome() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/delivery">
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<AdminHome />} />
