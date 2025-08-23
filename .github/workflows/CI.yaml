@@ -60,7 +60,7 @@ jobs:
       # 8. Incrementar versión del chart automáticamente
       - name: Bump Chart version
         run: |
-          CHART_PATH=charts-src/delivery-app
+          CHART_PATH=charts-src/delivery-app/delivery-app
           VERSION=$(yq eval '.version' $CHART_PATH/Chart.yaml)
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
           PATCH=$((PATCH + 1))
@@ -73,7 +73,7 @@ jobs:
       - name: Package Helm chart
         run: |
           mkdir -p helm-repo/_dist
-          helm package charts-src/delivery-app --destination helm-repo/_dist
+          helm package charts-src/delivery-app/delivery-app --destination helm-repo/_dist
 
       # 10. Actualizar index.yaml en el repo Helm
       - name: Update Helm repo index
