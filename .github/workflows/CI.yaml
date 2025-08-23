@@ -24,7 +24,7 @@ jobs:
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
           image: andrea233/delivery-system
-          tags: latest
+          tags: ${{ github.sha }}
           registry: docker.io  # Cambia a true si quieres subir a Docker Hub
           dockerfile: Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
