@@ -37,9 +37,9 @@ jobs:
 
       # 5. Empaquetar chart Helm
       - name: Package Helm chart
-        run:
-            mkdir -p helm-packages
-            helm package delivery-app/delivery-app --destination helm-packages
+        run: |
+          mkdir -p helm-packages
+          helm package delivery-app/delivery-app --destination helm-packages
 
       # 6. Actualizar index.yaml
       - name: Update Helm repo index
