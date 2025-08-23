@@ -40,7 +40,7 @@ jobs:
       - name: Package Helm chart
         run: |
           mkdir -p helm-packages
-          helm package delivery-app/delivery-app --destination helm-packages
+          helm package delivery-app --destination helm-packages
 
       # 6. Empaquetar subcharts (opcional, si necesitas actualizarlos separados)
       - name: Package subcharts
