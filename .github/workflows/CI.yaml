@@ -31,11 +31,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4. Clonar repositorio de Helm Charts
-      - name: Checkout Helm chart repository
+      # 4. Clonar repositorio de Helm Repo (index.yaml + .tgz)
+      - name: Checkout Helm repo
         uses: actions/checkout@v3
         with:
-          repository: AndreSosa21/chartsHelm-delivery-app
+          repository: AndreSosa21/helm_delivery-app
           path: helm-repo
 
       # 5. Instalar yq para editar YAML
@@ -62,25 +62,25 @@ jobs:
           yq eval ".appVersion = \"$GITHUB_SHA\"" -i $CHART_PATH/Chart.yaml
           echo "New chart version: $NEW_VERSION"
 
-      # 8. Empaquetar Helm chart
+      # 8. Empaquetar Helm chart (a carpeta _dist temporal)
       - name: Package Helm chart
         run: |
-          mkdir -p helm-repo/delivery-app/delivery-app/helm-packages
-          helm package helm-repo/delivery-app/delivery-app --destination helm-repo/delivery-app/delivery-app/helm-packages
+          mkdir -p helm-repo/_dist
+          helm package helm-repo/delivery-app/delivery-app --destination helm-repo/_dist
 
-      # 9. Actualizar index.yaml con la URL final
+      # 9. Actualizar index.yaml en la raíz del repo Helm
       - name: Update Helm repo index
         run: |
-          helm repo index helm-repo/delivery-app/delivery-app/helm-packages \
-            --url https://andresosa21.github.io/chartsHelm-delivery-app/delivery-app/delivery-app/ \
-            --merge helm-repo/delivery-app/delivery-app/index.yaml
+          helm repo index helm-repo/_dist \
+            --url https://andresosa21.github.io/helm_delivery-app/ \
+            --merge helm-repo/index.yaml
 
-      # 10. Subir charts al repo de GitHub Pages usando PAT
+      # 10. Subir charts al repo Helm (gh-pages branch)
       - name: Deploy Helm chart to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.HELM_CHARTS_PAT }}
-          publish_dir: ./helm-repo/delivery-app/delivery-app/helm-packages
+          publish_dir: ./helm-repo/_dist
           publish_branch: gh-pages
           force_orphan: true
           allow_empty_commit: false
