@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Clonar el repositorio de la aplicación
+      # 1. Clonar el repositorio de la app
       - name: Checkout application repository
         uses: actions/checkout@v3
 
-      # 2. Configurar Node.js (si la app lo requiere)
+      # 2. Configurar Node.js (si tu app lo requiere)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -31,48 +31,36 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # ------------------------------
-      # 4. Clonar el repositorio del Helm Chart (fuente)
+      # 4. Clonar el repositorio de Helm Charts
       - name: Checkout Helm chart repository
         uses: actions/checkout@v3
         with:
           repository: AndreSosa21/chartsHelm-delivery-app
           path: helm-repo
 
-      # 5. Clonar el repositorio de GitHub Pages (donde se publican los charts)
-      - name: Checkout Helm Pages repository
-        uses: actions/checkout@v3
-        with:
-          repository: AndreSosa21/chartsHelm-delivery-app
-          token: ${{ secrets.GITHUB_TOKEN }}
-          path: helm-pages
+      # 5. Debug: mostrar estructura del repo del chart
+      - name: Debug - List files
+        run: ls -R helm-repo
 
-      # 6. Debug: ver estructura de los repositorios
-      - name: Debug - List repos
-        run: |
-          echo "Helm source repo:"
-          ls -R helm-repo
-          echo "Helm Pages repo:"
-          ls -R helm-pages
-
-      # 7. Empaquetar chart Helm dentro del repo de Pages
+      # 6. Empaquetar Helm Chart
       - name: Package Helm chart
         run: |
-          helm package helm-repo/delivery-app/delivery-app --destination helm-pages
+          mkdir -p helm-packages
+          helm package helm-repo/delivery-app/delivery-app --destination helm-packages
 
-      # 8. Actualizar index.yaml dentro del repositorio de Pages
+      # 7. Actualizar index.yaml
       - name: Update Helm repo index
         run: |
-          cd helm-pages
-          if [ -f index.yaml ]; then
-            helm repo index . --url https://andreSosa21.github.io/chartsHelm-delivery-app/ --merge index.yaml
-          else
-            helm repo index . --url https://andreSosa21.github.io/chartsHelm-delivery-app/
-          fi
+          helm repo index helm-packages --url https://andresosa21.github.io/chartsHelm-delivery-app/ \
+            --merge helm-repo/index.yaml
 
-      # 9. Subir charts y index.yaml al repo de GitHub Pages
+      # 8. Subir charts al repo de GitHub Pages usando PAT
       - name: Deploy Helm chart to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./helm-repo/helm-packages
+          github_token: ${{ secrets.HELM_CHARTS_PAT }}  # <-- Usa el PAT aquí
+          publish_dir: ./helm-packages
+          publish_branch: gh-pages
+          force_orphan: true
+          allow_empty_commit: true
+          enable_jekyll: false
