@@ -1,4 +1,4 @@
-name: CI/CD Helm Chart + Docker
+name: CI/CD Helm Chart + Docker + Auto-version
 
 on:
   push:
@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Clonar el repositorio de la app
+      # 1. Clonar repositorio de la app
       - name: Checkout application repository
         uses: actions/checkout@v3
 
-      # 2. Configurar Node.js (si tu app lo requiere)
+      # 2. Configurar Node.js si tu app lo requiere
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -31,36 +31,56 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4. Clonar el repositorio de Helm Charts
+      # 4. Clonar repositorio de Helm Charts
       - name: Checkout Helm chart repository
         uses: actions/checkout@v3
         with:
           repository: AndreSosa21/chartsHelm-delivery-app
           path: helm-repo
 
-      # 5. Debug: mostrar estructura del repo del chart
-      - name: Debug - List files
-        run: ls -R helm-repo
+      # 5. Instalar yq para editar YAML
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
 
-      # 6. Empaquetar Helm Chart
+      # 6. Actualizar values.yaml con la nueva imagen
+      - name: Update Helm chart image
+        run: |
+          yq eval ".app.image.tag = \"${GITHUB_SHA}\"" -i helm-repo/delivery-app/delivery-app/values.yaml
+
+      # 7. Incrementar versión del chart automáticamente
+      - name: Bump Chart version
+        run: |
+          CHART_PATH=helm-repo/delivery-app/delivery-app
+          VERSION=$(yq eval '.version' $CHART_PATH/Chart.yaml)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          PATCH=$((PATCH + 1))
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          yq eval ".version = \"$NEW_VERSION\"" -i $CHART_PATH/Chart.yaml
+          yq eval ".appVersion = \"$GITHUB_SHA\"" -i $CHART_PATH/Chart.yaml
+          echo "New chart version: $NEW_VERSION"
+
+      # 8. Empaquetar Helm chart
       - name: Package Helm chart
         run: |
           mkdir -p helm-packages
           helm package helm-repo/delivery-app/delivery-app --destination helm-packages
 
-      # 7. Actualizar index.yaml
+      # 9. Actualizar index.yaml
       - name: Update Helm repo index
         run: |
           helm repo index helm-packages --url https://andresosa21.github.io/chartsHelm-delivery-app/ \
             --merge helm-repo/index.yaml
 
-      # 8. Subir charts al repo de GitHub Pages usando PAT
+      # 10. Subir charts al repo de GitHub Pages usando PAT
       - name: Deploy Helm chart to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.HELM_CHARTS_PAT }}  # <-- Usa el PAT aquí
+          github_token: ${{ secrets.HELM_CHARTS_PAT }}
           publish_dir: ./helm-packages
           publish_branch: gh-pages
           force_orphan: true
-          allow_empty_commit: true
+          allow_empty_commit: false
           enable_jekyll: false
