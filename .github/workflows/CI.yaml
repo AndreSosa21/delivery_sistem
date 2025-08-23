@@ -1,4 +1,4 @@
-name: CI/CD Helm Chart + Docker
+name: CI/CD Helm + Docker
 
 on:
   push:
@@ -6,25 +6,20 @@ on:
       - main
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      # 1. Clonar el repositorio
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      # 1. Clonar repo
+      - uses: actions/checkout@v3
+        name: Checkout repository
 
-      # 2. Mostrar estructura para debug
-      - name: Show repo structure
-        run: ls -R
-
-      # 3. Configurar Node.js si lo necesitas
+      # 2. Configurar Node.js (si tu app lo necesita)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # 4. Build y push de la imagen Docker
+      # 3. Construir y subir Docker image
       - name: Build and push Docker image
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
@@ -35,20 +30,35 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 5. Empaquetar chart Helm
+      # 4. Instalar Helm
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+
+      # 5. Empaquetar chart principal
       - name: Package Helm chart
         run: |
           mkdir -p helm-packages
           helm package $GITHUB_WORKSPACE/delivery-app/delivery-app --destination helm-packages
 
-      # 6. Actualizar index.yaml
+      # 6. Empaquetar subcharts (opcional, si necesitas actualizarlos separados)
+      - name: Package subcharts
+        run: |
+          helm package delivery-app/charts/db --destination helm-packages
+
+      # 7. Actualizar index.yaml
       - name: Update Helm repo index
         run: |
-          helm repo index helm-packages --url https://andresosa21.github.io/chartsHelm-delivery-app/
+          helm repo index helm-packages --merge index.yaml --url https://andresosa21.github.io/chartsHelm-delivery-app/
 
-      # 7. Subir los charts empaquetados a GitHub Pages
-      - name: Deploy Helm chart to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v6
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./helm-packages
+      # 8. Commit y push de los .tgz e index.yaml a GitHub Pages
+      - name: Commit and push Helm packages
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add helm-packages/*.tgz index.yaml
+          git commit -m "Update Helm chart packages [skip ci]" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
