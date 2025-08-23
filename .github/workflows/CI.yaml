@@ -10,21 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Clonar el repositorio
-      - name: Checkout repository
+      # 1. Clonar el repositorio de la app
+      - name: Checkout application repository
         uses: actions/checkout@v3
 
-      # 2. Mostrar estructura para debug (opcional)
-      - name: Show repo structure
-        run: ls -R
-
-      # 3. Configurar Node.js si lo necesitas
+      # 2. Configurar Node.js (si tu app lo requiere)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # 4. Construir y push de la imagen Docker
+      # 3. Build y push de la imagen Docker
       - name: Build and push Docker image
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
@@ -34,23 +30,32 @@ jobs:
           dockerfile: Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      
+       #3 WORKFLOW HELM CHART   
 
-      #debug
+      # 4. Clonar el repositorio del Helm Chart
+      - name: Checkout Helm chart repository
+        uses: actions/checkout@v3
+        with:
+          repository: AndreSosa21/chartsHelm-delivery-app
+          path: helm-repo
+
+      # 5. Debug: ver estructura del repo del chart
       - name: Debug - List files
-        run: ls -R $GITHUB_WORKSPACE 
+        run: ls -R helm-repo
 
-      # 5. Empaquetar chart Helm
+      # 6. Empaquetar chart Helm
       - name: Package Helm chart
         run: |
           mkdir -p helm-packages
-          helm package delivery-app/delivery-app --destination helm-packages
+          helm package helm-repo/delivery-app/delivery-app --destination helm-packages
 
-      # 6. Actualizar index.yaml
+      # 7. Actualizar index.yaml del repo Helm
       - name: Update Helm repo index
         run: |
           helm repo index helm-packages --url https://andresosa21.github.io/chartsHelm-delivery-app/
 
-      # 7. Subir los charts empaquetados a GitHub Pages
+      # 8. Subir los charts empaquetados a GitHub Pages
       - name: Deploy Helm chart to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
