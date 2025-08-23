@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'delivery-app/delivery-app/**'
 
 jobs:
   build-and-publish:
