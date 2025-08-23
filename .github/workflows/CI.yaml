@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'delivery-app/delivery-app/**'
 
 jobs:
   build-and-publish:
@@ -68,11 +70,11 @@ jobs:
           mkdir -p helm-repo/delivery-app/delivery-app/helm-packages
           helm package helm-repo/delivery-app/delivery-app --destination helm-repo/delivery-app/delivery-app/helm-packages
 
-      # 9. Actualizar index.yaml
+      # 9. Actualizar index.yaml con la URL final
       - name: Update Helm repo index
         run: |
           helm repo index helm-repo/delivery-app/delivery-app/helm-packages \
-            --url https://andresosa21.github.io/chartsHelm-delivery-app/ \
+            --url https://andresosa21.github.io/chartsHelm-delivery-app/delivery-app/delivery-app/ \
             --merge helm-repo/delivery-app/delivery-app/index.yaml
 
       # 10. Subir charts al repo de GitHub Pages usando PAT
