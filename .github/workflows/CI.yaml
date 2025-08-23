@@ -31,29 +31,36 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4. Clonar repositorio de Helm Repo (index.yaml + .tgz)
+      # 4. Clonar repo de charts fuente (con values.yaml y Chart.yaml)
+      - name: Checkout Helm chart source repository
+        uses: actions/checkout@v3
+        with:
+          repository: AndreSosa21/chartsHelm-delivery-app
+          path: charts-src
+
+      # 5. Clonar repo Helm (publicación con index.yaml + .tgz)
       - name: Checkout Helm repo
         uses: actions/checkout@v3
         with:
           repository: AndreSosa21/helm_delivery-app
           path: helm-repo
 
-      # 5. Instalar yq para editar YAML
+      # 6. Instalar yq para editar YAML
       - name: Install yq
         run: |
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
           yq --version
 
-      # 6. Actualizar values.yaml con la nueva imagen
+      # 7. Actualizar values.yaml con la nueva imagen
       - name: Update Helm chart image
         run: |
-          yq eval ".app.image.tag = \"${GITHUB_SHA}\"" -i helm-repo/delivery-app/delivery-app/values.yaml
+          yq eval ".app.image.tag = \"${GITHUB_SHA}\"" -i charts-src/delivery-app/delivery-app/values.yaml
 
-      # 7. Incrementar versión del chart automáticamente
+      # 8. Incrementar versión del chart automáticamente
       - name: Bump Chart version
         run: |
-          CHART_PATH=helm-repo/delivery-app/delivery-app
+          CHART_PATH=charts-src/delivery-app
           VERSION=$(yq eval '.version' $CHART_PATH/Chart.yaml)
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
           PATCH=$((PATCH + 1))
@@ -62,20 +69,20 @@ jobs:
           yq eval ".appVersion = \"$GITHUB_SHA\"" -i $CHART_PATH/Chart.yaml
           echo "New chart version: $NEW_VERSION"
 
-      # 8. Empaquetar Helm chart (a carpeta _dist temporal)
+      # 9. Empaquetar Helm chart en carpeta temporal
       - name: Package Helm chart
         run: |
           mkdir -p helm-repo/_dist
-          helm package helm-repo/delivery-app/delivery-app --destination helm-repo/_dist
+          helm package charts-src/delivery-app --destination helm-repo/_dist
 
-      # 9. Actualizar index.yaml en la raíz del repo Helm
+      # 10. Actualizar index.yaml en el repo Helm
       - name: Update Helm repo index
         run: |
           helm repo index helm-repo/_dist \
             --url https://andresosa21.github.io/helm_delivery-app/ \
             --merge helm-repo/index.yaml
 
-      # 10. Subir charts al repo Helm (gh-pages branch)
+      # 11. Subir charts al repo Helm (gh-pages branch)
       - name: Deploy Helm chart to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
