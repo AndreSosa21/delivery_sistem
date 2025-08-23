@@ -60,7 +60,7 @@ jobs:
         run: |
           helm package helm-repo/delivery-app/delivery-app --destination helm-pages
 
-      # 8. Actualizar index.yaml dentro del repo de Pages
+      # 8. Actualizar index.yaml dentro del repositorio de Pages
       - name: Update Helm repo index
         run: |
           cd helm-pages
