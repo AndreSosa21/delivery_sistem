@@ -35,6 +35,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      #debug
+      - name: Debug - List files
+        run: ls -R $GITHUB_WORKSPACE 
+
       # 5. Empaquetar chart Helm
       - name: Package Helm chart
         run: |
