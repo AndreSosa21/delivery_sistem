@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Helm + Docker
 
 on:
   push:
@@ -9,23 +9,56 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Clonar el repositorio
+      # 1. Clonar repo
       - uses: actions/checkout@v3
         name: Checkout repository
 
-      # Configurar Node.js (si tu proyecto lo necesita)
+      # 2. Configurar Node.js (si tu app lo necesita)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # Construir y subir la imagen Docker
+      # 3. Construir y subir Docker image
       - name: Build and push Docker image
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
           image: andrea233/delivery-system
           tags: ${{ github.sha }}
-          registry: docker.io  # Cambia a true si quieres subir a Docker Hub
+          registry: docker.io
           dockerfile: Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 4. Instalar Helm
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+
+      # 5. Empaquetar chart principal
+      - name: Package Helm chart
+        run: |
+          mkdir -p helm-packages
+          helm package delivery-app/delivery-app --destination helm-packages
+
+      # 6. Empaquetar subcharts (opcional, si necesitas actualizarlos separados)
+      - name: Package subcharts
+        run: |
+          helm package delivery-app/charts/db --destination helm-packages
+
+      # 7. Actualizar index.yaml
+      - name: Update Helm repo index
+        run: |
+          helm repo index helm-packages --merge index.yaml --url https://andresosa21.github.io/chartsHelm-delivery-app/
+
+      # 8. Commit y push de los .tgz e index.yaml a GitHub Pages
+      - name: Commit and push Helm packages
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add helm-packages/*.tgz index.yaml
+          git commit -m "Update Helm chart packages [skip ci]" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
