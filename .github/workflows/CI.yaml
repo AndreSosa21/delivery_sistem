@@ -65,21 +65,22 @@ jobs:
       # 8. Empaquetar Helm chart
       - name: Package Helm chart
         run: |
-          mkdir -p helm-packages
-          helm package helm-repo/delivery-app/delivery-app --destination helm-packages
+          mkdir -p helm-repo/delivery-app/delivery-app/helm-packages
+          helm package helm-repo/delivery-app/delivery-app --destination helm-repo/delivery-app/delivery-app/helm-packages
 
       # 9. Actualizar index.yaml
       - name: Update Helm repo index
         run: |
-          helm repo index helm-packages --url https://andresosa21.github.io/chartsHelm-delivery-app/ \
-            --merge helm-repo/index.yaml
+          helm repo index helm-repo/delivery-app/delivery-app/helm-packages \
+            --url https://andresosa21.github.io/chartsHelm-delivery-app/ \
+            --merge helm-repo/delivery-app/delivery-app/index.yaml
 
       # 10. Subir charts al repo de GitHub Pages usando PAT
       - name: Deploy Helm chart to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.HELM_CHARTS_PAT }}
-          publish_dir: ./helm-packages
+          publish_dir: ./helm-repo/delivery-app/delivery-app/helm-packages
           publish_branch: gh-pages
           force_orphan: true
           allow_empty_commit: false
