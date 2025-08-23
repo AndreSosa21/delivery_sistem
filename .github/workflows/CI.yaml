@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Clonar el repositorio
+      - uses: actions/checkout@v3
+        name: Checkout repository
+
+      # Configurar Node.js (si tu proyecto lo necesita)
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # Construir y subir la imagen Docker
+      - name: Build and push Docker image
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          image: andrea233/delivery-system
+          tags: latest
+          registry: docker.io  # Cambia a true si quieres subir a Docker Hub
+          dockerfile: Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
