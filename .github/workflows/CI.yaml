@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Mostrar estructura para debug
+      # 2. Mostrar estructura para debug (opcional)
       - name: Show repo structure
         run: ls -R
 
@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '20'
 
-      # 4. Build y push de la imagen Docker
+      # 4. Construir y push de la imagen Docker
       - name: Build and push Docker image
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
